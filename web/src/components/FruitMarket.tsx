@@ -179,6 +179,21 @@ export default function FruitMarket() {
           </div>
         </section>
 
+        {useChain && chain.catalogError && (
+          <div
+            className="hero-card"
+            style={{ marginBottom: "1rem", borderColor: "var(--danger)" }}
+            role="alert"
+          >
+            <strong>Catalogue introuvable sur le nœud</strong>
+            <p style={{ margin: "0.5rem 0 0", fontSize: "0.88rem" }}>
+              {chain.catalogError} — Vérifie que <code>npx hardhat node</code> tourne toujours et que{" "}
+              <code>fruit-market-local.json</code> correspond au dernier déploiement (
+              <code>npm run deploy:local</code>
+              ).
+            </p>
+          </div>
+        )}
         {useChain && chain.txMessage && (
           <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{chain.txMessage}</p>
         )}

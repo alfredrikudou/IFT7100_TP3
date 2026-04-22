@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BrowserProvider, Contract, formatEther, parseEther } from "ethers";
+import {
+  BrowserProvider,
+  Contract,
+  JsonRpcProvider,
+  formatEther,
+  parseEther,
+} from "ethers";
 import type { Product } from "@/types/product";
 import abi from "@/contracts/FruitMarketV1.abi.json";
 import { ensureHardhatLocalChain } from "@/lib/chain";
@@ -49,6 +55,7 @@ export function useFruitMarketLocal() {
   const [pendingTx, setPendingTx] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [txMessage, setTxMessage] = useState<string | null>(null);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,9 +64,14 @@ export function useFruitMarketLocal() {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<LocalDeployFile>;
       })
-      .then((data) => {
+      .then((raw: LocalDeployFile) => {
         if (cancelled) return;
-        setDeployInfo(data);
+        const cid = Number(raw.chainId);
+        setDeployInfo({
+          proxyAddress: raw.proxyAddress,
+          chainId: Number.isFinite(cid) && cid > 0 ? cid : 31337,
+          rpcUrl: raw.rpcUrl ?? "http://127.0.0.1:8545",
+        });
         setDeployLoadError(null);
       })
       .catch(() => {
@@ -77,18 +89,25 @@ export function useFruitMarketLocal() {
   const contractAddress = deployInfo?.proxyAddress ?? null;
   const chainReady = Boolean(contractAddress && deployInfo?.chainId === 31337);
 
-  const readContract = useCallback(() => {
-    if (!contractAddress || typeof window === "undefined" || !window.ethereum) {
-      return null;
-    }
-    const provider = new BrowserProvider(window.ethereum);
+  /**
+   * Lectures catalogue via proxy Next `/api/rpc` → Hardhat (évite CORS navigateur → :8545).
+   * MetaMask n’est pas utilisé pour les vues ; les écritures restent via BrowserProvider.
+   */
+  const readOnlyContract = useCallback(() => {
+    if (!contractAddress) return null;
+    const rpcUrl =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/api/rpc`
+        : deployInfo?.rpcUrl ?? "http://127.0.0.1:8545";
+    const provider = new JsonRpcProvider(rpcUrl);
     return new Contract(contractAddress, abi, provider);
-  }, [contractAddress]);
+  }, [contractAddress, deployInfo?.rpcUrl]);
 
   const refreshCatalog = useCallback(async () => {
-    const c = readContract();
+    const c = readOnlyContract();
     if (!c) return;
     setLoadingCatalog(true);
+    setCatalogError(null);
     try {
       const nextId = await c.nextProductId();
       const n = Number(nextId);
@@ -111,10 +130,15 @@ export function useFruitMarketLocal() {
         }
       }
       setProducts(list.sort((a, b) => a.name.localeCompare(b.name, "fr")));
+    } catch (e) {
+      const msg =
+        e instanceof Error ? e.message : "Impossible de lire le catalogue sur le nœud local.";
+      setCatalogError(msg);
+      setProducts([]);
     } finally {
       setLoadingCatalog(false);
     }
-  }, [readContract]);
+  }, [readOnlyContract]);
 
   useEffect(() => {
     if (chainReady) void refreshCatalog();
@@ -221,6 +245,7 @@ export function useFruitMarketLocal() {
     loadingCatalog,
     pendingTx,
     products,
+    catalogError,
     txMessage,
     connect,
     disconnect,
