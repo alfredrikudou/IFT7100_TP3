@@ -1,0 +1,58 @@
+import type { Product } from '../types/product'
+
+export const MOCK_PRODUCTS: Product[] = [
+  {
+    id: '1',
+    name: 'Fraises du Québec',
+    description: 'Barquette 250 g, cueillette locale.',
+    priceEth: 0.008,
+    stock: 42,
+    emoji: '🍓',
+    sellerLabel: '0x71C…9A3f',
+  },
+  {
+    id: '2',
+    name: 'Bananes équitable',
+    description: 'Lot de 6, mûres à point.',
+    priceEth: 0.012,
+    stock: 80,
+    emoji: '🍌',
+    sellerLabel: '0xB4e…02c1',
+  },
+  {
+    id: '3',
+    name: 'Oranges Valencia',
+    description: 'Le kg, jus acidulé.',
+    priceEth: 0.015,
+    stock: 35,
+    emoji: '🍊',
+    sellerLabel: '0xE91…77bb',
+  },
+  {
+    id: '4',
+    name: 'Avocats Hass',
+    description: 'Mûrissement contrôlé, pièce.',
+    priceEth: 0.009,
+    stock: 24,
+    emoji: '🥑',
+    sellerLabel: '0x71C…9A3f',
+  },
+  {
+    id: '5',
+    name: 'Myrtilles sauvages',
+    description: '125 g, surgelées ou fraîches selon arrivage.',
+    priceEth: 0.011,
+    stock: 0,
+    emoji: '🫐',
+    sellerLabel: '0xF02…88d4',
+  },
+  {
+    id: '6',
+    name: 'Pastèque sans pépin',
+    description: 'Demie pastèque, pré-tranchée.',
+    priceEth: 0.022,
+    stock: 12,
+    emoji: '🍉',
+    sellerLabel: '0xB4e…02c1',
+  },
+]

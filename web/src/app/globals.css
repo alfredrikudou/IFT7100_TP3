@@ -1,0 +1,50 @@
+:root {
+  --bg: #f6f8f6;
+  --surface: #ffffff;
+  --surface-2: #eef4ef;
+  --text: #14221a;
+  --muted: #5c6b61;
+  --accent: #22b85c;
+  --accent-dark: #157a3e;
+  --accent-soft: #d9f3e4;
+  --border: #d6e5dc;
+  --danger: #c03636;
+  --ok: #157a3e;
+  --shadow: 0 8px 28px rgb(20 34 26 / 0.08);
+  --shadow-hover: 0 14px 36px rgb(20 34 26 / 0.12);
+
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text);
+  background-color: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

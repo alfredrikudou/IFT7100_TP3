@@ -1,0 +1,8 @@
+node_modules
+.cache
+artifacts
+cache
+typechain-types
+.env
+web/.next
+web/out

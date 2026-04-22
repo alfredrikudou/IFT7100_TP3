@@ -1,0 +1,40 @@
+{
+  "name": "ift7100_tp3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "node": "hardhat node",
+    "sync:abi": "node scripts/sync-abi.mjs",
+    "web:dev": "npm run dev --prefix web",
+    "web:build": "npm run build --prefix web",
+    "web:start": "npm run start --prefix web",
+    "frontend:dev": "npm run dev --prefix web",
+    "frontend:build": "npm run build --prefix web"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alfredrikudou/IFT7100_TP3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/alfredrikudou/IFT7100_TP3/issues"
+  },
+  "homepage": "https://github.com/alfredrikudou/IFT7100_TP3#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "@openzeppelin/contracts-upgradeable": "^5.6.1",
+    "@openzeppelin/hardhat-upgrades": "^3.9.1",
+    "dotenv": "^17.4.2",
+    "hardhat": "^2.28.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
