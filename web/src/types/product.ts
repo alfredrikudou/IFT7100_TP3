@@ -7,7 +7,9 @@ export interface Product {
   priceEth: number
   stock: number
   emoji: string
-  /** Adresse vendeur tronquée (lecture chaîne). */
+  /** Adresse vendeur complète (lecture chaîne ; absent côté formulaire). */
+  sellerAddress?: string
+  /** Adresse vendeur tronquée (affichage). */
   sellerLabel: string
   /** Si défini et false : annonce désactivée on-chain. */
   active?: boolean

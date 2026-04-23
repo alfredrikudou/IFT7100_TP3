@@ -3,15 +3,15 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 /**
- * Déploie FruitMarketV1 derrière un proxy UUPS (état dans le proxy, logique dans l’implémentation).
+ * Déploie FruitMarketV2 derrière un proxy UUPS (hérite V1 ; notation vendeur en V2).
  * Sur localhost : écrit aussi web/public/fruit-market-local.json pour le front Next.js.
  */
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log("Déploiement avec :", deployer.address);
 
-  const FruitMarketV1 = await ethers.getContractFactory("FruitMarketV1");
-  const proxy = await upgrades.deployProxy(FruitMarketV1, [], {
+  const FruitMarketV2 = await ethers.getContractFactory("FruitMarketV2");
+  const proxy = await upgrades.deployProxy(FruitMarketV2, [], {
     initializer: "initialize",
     kind: "uups",
   });
@@ -22,7 +22,7 @@ async function main() {
   const net = await ethers.provider.getNetwork();
 
   console.log("Proxy FruitMarket (à utiliser dans le front / MetaMask) :", proxyAddress);
-  console.log("Implémentation V1 :", implAddress);
+  console.log("Implémentation V2 :", implAddress);
   console.log("Chain ID :", net.chainId.toString());
 
   if (net.chainId === 31337n) {

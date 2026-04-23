@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { SellerRatingInfo } from '@/types/purchase'
 import type { Product } from '../types/product'
 import styles from './ProductCard.module.css'
 
@@ -6,6 +7,7 @@ type Props = {
   product: Product
   walletConnected: boolean
   onBuy: (productId: string, quantity: number) => void
+  sellerRating?: SellerRatingInfo | null
 }
 
 function formatEth(n: number) {
@@ -15,7 +17,7 @@ function formatEth(n: number) {
   })
 }
 
-export function ProductCard({ product, walletConnected, onBuy }: Props) {
+export function ProductCard({ product, walletConnected, onBuy, sellerRating }: Props) {
   const [qty, setQty] = useState(1)
 
   useEffect(() => {
@@ -63,6 +65,16 @@ export function ProductCard({ product, walletConnected, onBuy }: Props) {
           </span>
         </div>
         <p className={styles.seller}>Vendeur : {product.sellerLabel}</p>
+        <p className={styles.reputationLabel}>Réputation du vendeur (tous ses produits)</p>
+        {sellerRating && sellerRating.totalRatings > BigInt(0) ? (
+          <p className={styles.rating}>
+            Moyenne : {(Number(sellerRating.averageScaledBy100) / 100).toFixed(1)} / 5 —{" "}
+            {sellerRating.totalRatings.toString()} vote
+            {Number(sellerRating.totalRatings) === 1 ? "" : "s"}
+          </p>
+        ) : (
+          <p className={styles.ratingMuted}>Pas encore de vote pour ce vendeur</p>
+        )}
 
         <div className={styles.buyRow}>
           <label className={styles.qtyLabel}>

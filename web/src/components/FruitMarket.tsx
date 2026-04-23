@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import { useFruitMarketLocal } from "@/hooks/useFruitMarketLocal";
 import { Header } from "@/components/Header";
+import headerStyles from "@/components/Header.module.css";
 import { ProductCatalog } from "@/components/ProductCatalog";
 import { SellProductModal } from "@/components/SellProductModal";
 import { FRUIT_EMOJIS } from "@/data/emojis";
@@ -87,6 +89,13 @@ export default function FruitMarket() {
           onOpenSell={() => setSellOpen(true)}
           networkLabel="Hardhat local (31337)"
           sellDisabled={!chainOk}
+          navSlot={
+            chainOk && chain.connected ? (
+              <Link href="/achats" className={headerStyles.navLink}>
+                Mes achats
+              </Link>
+            ) : null
+          }
         />
 
         <section className="hero" aria-labelledby="hero-title">
@@ -150,6 +159,7 @@ export default function FruitMarket() {
           <ProductCatalog
             products={chain.products}
             walletConnected={chain.connected}
+            sellerRatings={chain.sellerRatings}
             onBuy={(id, qty) => {
               void chain.buy(id, qty).catch((e) =>
                 showToast(e instanceof Error ? e.message : String(e)),

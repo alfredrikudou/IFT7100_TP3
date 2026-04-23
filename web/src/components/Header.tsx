@@ -1,15 +1,20 @@
-import styles from './Header.module.css'
-import { WalletBar } from './WalletBar'
+import type { ReactNode } from "react";
+import styles from "./Header.module.css";
+import { WalletBar } from "./WalletBar";
 
 type Props = {
-  walletConnected: boolean
-  mockAddress: string
-  onWalletToggle: () => void
-  onOpenSell: () => void
-  networkLabel?: string
+  walletConnected: boolean;
+  mockAddress: string;
+  onWalletToggle: () => void;
+  onOpenSell: () => void;
+  networkLabel?: string;
   /** Désactive « Vendre » si le contrat / réseau local n’est pas disponible. */
-  sellDisabled?: boolean
-}
+  sellDisabled?: boolean;
+  /** Contenu entre le portefeuille et « Vendre » (ex. lien Mes achats). */
+  navSlot?: ReactNode;
+  /** Masque le bouton vendre (page dédiée achats, etc.). */
+  hideSell?: boolean;
+};
 
 export function Header({
   walletConnected,
@@ -18,6 +23,8 @@ export function Header({
   onOpenSell,
   networkLabel,
   sellDisabled = false,
+  navSlot,
+  hideSell = false,
 }: Props) {
   return (
     <header className={styles.header}>
@@ -38,16 +45,19 @@ export function Header({
           onToggle={onWalletToggle}
           networkLabel={networkLabel}
         />
-        <button
-          type="button"
-          className={styles.sellBtn}
-          onClick={onOpenSell}
-          disabled={sellDisabled}
-          title={sellDisabled ? "Déployez le contrat local avant de publier." : undefined}
-        >
-          Vendre un produit
-        </button>
+        {navSlot ? <div className={styles.navSlot}>{navSlot}</div> : null}
+        {!hideSell ? (
+          <button
+            type="button"
+            className={styles.sellBtn}
+            onClick={onOpenSell}
+            disabled={sellDisabled}
+            title={sellDisabled ? "Déployez le contrat local avant de publier." : undefined}
+          >
+            Vendre un produit
+          </button>
+        ) : null}
       </nav>
     </header>
-  )
+  );
 }

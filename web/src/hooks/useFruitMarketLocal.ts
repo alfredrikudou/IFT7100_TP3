@@ -5,11 +5,13 @@ import {
   BrowserProvider,
   Contract,
   JsonRpcProvider,
+  EventLog,
   formatEther,
   parseEther,
 } from "ethers";
 import type { Product } from "@/types/product";
-import abi from "@/contracts/FruitMarketV1.abi.json";
+import type { MyPurchaseRow, SellerRatingInfo } from "@/types/purchase";
+import abi from "@/contracts/FruitMarketV2.abi.json";
 import { emojiFromIconId } from "@/data/emojis";
 import { ensureHardhatLocalChain } from "@/lib/chain";
 
@@ -37,6 +39,7 @@ function mapProduct(
   },
 ): Product {
   const stockNum = Number(raw.stock);
+  const seller = String(raw.seller);
   return {
     id: id.toString(),
     name: raw.name,
@@ -44,7 +47,8 @@ function mapProduct(
     priceEth: Number(formatEther(raw.priceWei)),
     stock: Number.isSafeInteger(stockNum) ? stockNum : 0,
     emoji: emojiFromIconId(Number(raw.iconId)),
-    sellerLabel: shorten(raw.seller),
+    sellerAddress: seller,
+    sellerLabel: shorten(seller),
     active: raw.active,
   };
 }
@@ -59,6 +63,9 @@ export function useFruitMarketLocal() {
   const [products, setProducts] = useState<Product[]>([]);
   const [txMessage, setTxMessage] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [sellerRatings, setSellerRatings] = useState<Record<string, SellerRatingInfo>>({});
+  const [myPurchases, setMyPurchases] = useState<MyPurchaseRow[]>([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,9 +152,116 @@ export function useFruitMarketLocal() {
     }
   }, [readOnlyContract]);
 
+  const [ratingNonce, setRatingNonce] = useState(0);
+
+  const refreshSellerRatings = useCallback(async () => {
+    const c = readOnlyContract();
+    if (!c) return;
+    const sellers = [
+      ...new Set(
+        products.map((p) => p.sellerAddress).filter((a): a is string => Boolean(a)),
+      ),
+    ];
+    if (sellers.length === 0) {
+      setSellerRatings({});
+      return;
+    }
+    try {
+      const next: Record<string, SellerRatingInfo> = {};
+      await Promise.all(
+        sellers.map(async (addr) => {
+          const [totalScore, totalRatings, averageScaledBy100] = await c.getSellerRating(addr);
+          next[addr.toLowerCase()] = {
+            totalScore: totalScore as bigint,
+            totalRatings: totalRatings as bigint,
+            averageScaledBy100: averageScaledBy100 as bigint,
+          };
+        }),
+      );
+      setSellerRatings(next);
+    } catch {
+      setSellerRatings({});
+    }
+  }, [readOnlyContract, products]);
+
+  const refreshMyPurchases = useCallback(async () => {
+    const c = readOnlyContract();
+    if (!c || !account) {
+      setMyPurchases([]);
+      return;
+    }
+    setLoadingPurchases(true);
+    try {
+      const buyFilter = c.filters.ProductPurchased(null, null, account);
+      const buyEvents = await c.queryFilter(buyFilter, 0, "latest");
+
+      const ratedFilter = c.filters.SellerRated(null, null, account);
+      const ratedEvents = await c.queryFilter(ratedFilter, 0, "latest");
+      const myRatingByPurchase = new Map<string, number>();
+      for (const ev of ratedEvents) {
+        if (!(ev instanceof EventLog) || ev.args == null) continue;
+        const pid = (ev.args as { purchaseId?: bigint }).purchaseId;
+        const rt = (ev.args as { rating?: bigint | number }).rating;
+        if (pid === undefined || rt === undefined) continue;
+        myRatingByPurchase.set(pid.toString(), Number(rt));
+      }
+
+      const rows: MyPurchaseRow[] = [];
+      for (const ev of buyEvents) {
+        if (!(ev instanceof EventLog)) continue;
+        const args = ev.args as unknown as {
+          purchaseId: bigint;
+          productId: bigint;
+          buyer: string;
+          seller: string;
+          quantity: bigint;
+          totalPaid: bigint;
+        };
+        if (args.purchaseId === undefined) continue;
+        const rated = (await c.isPurchaseRated(args.purchaseId)) as boolean;
+        const seller = String(args.seller);
+        const qty = Number(args.quantity);
+        const totalPaidWei = args.totalPaid as bigint;
+        const totalPaidEth = Number(formatEther(totalPaidWei));
+        const unitPriceEth = qty > 0 ? totalPaidEth / qty : totalPaidEth;
+        const pidStr = args.purchaseId.toString();
+        rows.push({
+          purchaseId: pidStr,
+          productId: args.productId.toString(),
+          seller,
+          sellerLabel: shorten(seller),
+          rated,
+          quantity: qty,
+          totalPaidEth,
+          unitPriceEth,
+          myRating: myRatingByPurchase.get(pidStr),
+        });
+      }
+      rows.sort((a, b) => {
+        const da = BigInt(a.purchaseId);
+        const db = BigInt(b.purchaseId);
+        return db > da ? 1 : db < da ? -1 : 0;
+      });
+      setMyPurchases(rows);
+    } catch {
+      setMyPurchases([]);
+    } finally {
+      setLoadingPurchases(false);
+    }
+  }, [readOnlyContract, account]);
+
   useEffect(() => {
     if (chainReady) void refreshCatalog();
   }, [chainReady, refreshCatalog]);
+
+  useEffect(() => {
+    if (!chainReady) return;
+    void refreshSellerRatings();
+  }, [chainReady, products, ratingNonce, refreshSellerRatings]);
+
+  useEffect(() => {
+    if (chainReady && account) void refreshMyPurchases();
+  }, [chainReady, account, refreshMyPurchases]);
 
   useEffect(() => {
     const eth = window.ethereum;
@@ -207,8 +321,31 @@ export function useFruitMarketLocal() {
       setPendingTx(false);
       setTxMessage(`Confirmée : ${tx.hash}`);
       await refreshCatalog();
+      await refreshMyPurchases();
     },
-    [account, contractAddress, refreshCatalog],
+    [account, contractAddress, refreshCatalog, refreshMyPurchases],
+  );
+
+  const rateSeller = useCallback(
+    async (purchaseId: string, rating: number) => {
+      if (!contractAddress || !account) return;
+      if (rating < 1 || rating > 5) return;
+      const eth = window.ethereum;
+      if (!eth) return;
+      const provider = new BrowserProvider(eth);
+      const signer = await provider.getSigner();
+      const c = new Contract(contractAddress, abi, signer);
+      setPendingTx(true);
+      setTxMessage("Envoi de la notation…");
+      const tx = await c.rateSeller(BigInt(purchaseId), rating);
+      setTxMessage(`Transaction : ${tx.hash}`);
+      await tx.wait();
+      setPendingTx(false);
+      setTxMessage(`Notation confirmée : ${tx.hash}`);
+      setRatingNonce((n) => n + 1);
+      await refreshMyPurchases();
+    },
+    [account, contractAddress, refreshMyPurchases],
   );
 
   const sell = useCallback(
@@ -259,11 +396,15 @@ export function useFruitMarketLocal() {
     products,
     catalogError,
     txMessage,
+    sellerRatings,
+    myPurchases,
+    loadingPurchases,
     connect,
     disconnect,
     refreshCatalog,
     buy,
     sell,
+    rateSeller,
     shorten,
   };
 }

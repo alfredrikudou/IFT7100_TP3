@@ -88,6 +88,28 @@
   font-family: ui-monospace, monospace;
 }
 
+.reputationLabel {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rating {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+
+.ratingMuted {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 .buyRow {
   display: flex;
   flex-wrap: wrap;

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /**
  * @title FruitMarketV1
- * @notice Marché de fruits (TP3) — version initiale upgradeable (UUPS).
+ * @notice Marché de fruits — version initiale upgradeable (UUPS).
  * @dev Complète les corps des fonctions marquées TODO. `_authorizeUpgrade` est déjà correct pour UUPS + Ownable.
  * @dev Réentrance : avec OZ v5, ajoute une protection adaptée dans `purchaseProduct` (pattern CEI et/ou guard si tu lies une implémentation compatible).
  */

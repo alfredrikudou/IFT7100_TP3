@@ -1,3 +1,4 @@
+import type { SellerRatingInfo } from '@/types/purchase'
 import type { Product } from '../types/product'
 import { ProductCard } from './ProductCard'
 import styles from './ProductCatalog.module.css'
@@ -8,9 +9,11 @@ type Props = {
   onBuy: (productId: string, quantity: number) => void
   /** Message si la liste est vide (sinon texte par défaut). */
   emptyMessage?: string
+  /** Clé = adresse vendeur lowercased (getSellerRating). */
+  sellerRatings: Record<string, SellerRatingInfo>
 }
 
-export function ProductCatalog({ products, walletConnected, onBuy, emptyMessage }: Props) {
+export function ProductCatalog({ products, walletConnected, onBuy, emptyMessage, sellerRatings }: Props) {
   const empty =
     emptyMessage ??
     "Aucun produit actif sur le contrat pour le moment. Publiez une annonce via « Vendre un produit »."
@@ -21,7 +24,10 @@ export function ProductCatalog({ products, walletConnected, onBuy, emptyMessage 
         <h2 id="catalog-title" className={styles.title}>
           Catalogue
         </h2>
-        <p className={styles.sub}>Produits lus depuis le contrat déployé (Hardhat local).</p>
+        <p className={styles.sub}>
+          Produits lus depuis le contrat. La note affichée est celle du vendeur (agrégée sur tous ses produits), pas
+          par annonce.
+        </p>
       </div>
       <div className={styles.grid}>
         {products.map((p) => (
@@ -30,6 +36,11 @@ export function ProductCatalog({ products, walletConnected, onBuy, emptyMessage 
               product={p}
               walletConnected={walletConnected}
               onBuy={onBuy}
+              sellerRating={
+                p.sellerAddress
+                  ? sellerRatings[p.sellerAddress.toLowerCase()] ?? null
+                  : null
+              }
             />
         ))}
       </div>

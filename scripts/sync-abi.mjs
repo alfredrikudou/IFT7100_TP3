@@ -1,5 +1,6 @@
 /**
  * Copie l’ABI compilé vers web/src/contracts (pour import côté Next.js).
+ * FruitMarketV2 inclut l’interface complète (V1 + notation).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -9,10 +10,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const artifactPath = path.join(
   root,
-  "artifacts/contracts/FruitMarketV1.sol/FruitMarketV1.json",
+  "artifacts/contracts/FruitMarketV2.sol/FruitMarketV2.json",
 );
 const destDir = path.join(root, "web/src/contracts");
-const destAbi = path.join(destDir, "FruitMarketV1.abi.json");
+const destAbi = path.join(destDir, "FruitMarketV2.abi.json");
 
 if (!fs.existsSync(artifactPath)) {
   console.error("Artifact introuvable. Lance d’abord : npm run compile");

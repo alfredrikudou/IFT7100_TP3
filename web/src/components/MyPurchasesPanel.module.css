@@ -1,0 +1,141 @@
+.section {
+  margin: 2rem 0 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.03);
+}
+
+.head {
+  margin-bottom: 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.muted {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+}
+
+.prod {
+  font-weight: 600;
+}
+
+.seller {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.25rem;
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.details strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.myVote {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--accent-dark);
+}
+
+.code {
+  font-size: 0.78em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.06);
+}
+
+.done {
+  font-size: 0.85rem;
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+
+.stars {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.starBtn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated, #1a1f1c);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.starBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgb(34 139 84 / 0.12);
+}
+
+.starBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
