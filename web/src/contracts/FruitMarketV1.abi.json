@@ -54,6 +54,16 @@
   },
   {
     "inputs": [],
+    "name": "InvalidDescription",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidIconId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidInitialization",
     "type": "error"
   },
@@ -240,6 +250,18 @@
       },
       {
         "indexed": false,
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "iconId",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "priceWei",
         "type": "uint256"
@@ -343,6 +365,32 @@
   },
   {
     "inputs": [],
+    "name": "MAX_DESCRIPTION_LENGTH",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_ICON_ID",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "UPGRADE_INTERFACE_VERSION",
     "outputs": [
       {
@@ -370,6 +418,16 @@
         "internalType": "uint256",
         "name": "stock",
         "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "iconId",
+        "type": "uint8"
       }
     ],
     "name": "addProduct",
@@ -417,6 +475,16 @@
             "internalType": "string",
             "name": "name",
             "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint8",
+            "name": "iconId",
+            "type": "uint8"
           },
           {
             "internalType": "uint256",

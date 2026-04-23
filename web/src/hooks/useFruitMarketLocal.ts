@@ -10,6 +10,7 @@ import {
 } from "ethers";
 import type { Product } from "@/types/product";
 import abi from "@/contracts/FruitMarketV1.abi.json";
+import { emojiFromIconId } from "@/data/emojis";
 import { ensureHardhatLocalChain } from "@/lib/chain";
 
 type LocalDeployFile = {
@@ -27,6 +28,8 @@ function mapProduct(
   raw: {
     id: bigint;
     name: string;
+    description: string;
+    iconId: bigint;
     priceWei: bigint;
     stock: bigint;
     seller: string;
@@ -37,10 +40,10 @@ function mapProduct(
   return {
     id: id.toString(),
     name: raw.name,
-    description: "",
+    description: raw.description ?? "",
     priceEth: Number(formatEther(raw.priceWei)),
     stock: Number.isSafeInteger(stockNum) ? stockNum : 0,
-    emoji: "📦",
+    emoji: emojiFromIconId(Number(raw.iconId)),
     sellerLabel: shorten(raw.seller),
     active: raw.active,
   };
@@ -119,6 +122,8 @@ export function useFruitMarketLocal() {
             mapProduct(BigInt(i), {
               id: p.id,
               name: p.name,
+              description: p.description,
+              iconId: p.iconId,
               priceWei: p.priceWei,
               stock: p.stock,
               seller: p.seller,
@@ -207,7 +212,13 @@ export function useFruitMarketLocal() {
   );
 
   const sell = useCallback(
-    async (name: string, priceEth: number, stock: number) => {
+    async (
+      name: string,
+      priceEth: number,
+      stock: number,
+      description: string,
+      iconId: number,
+    ) => {
       if (!contractAddress || !account) return;
       const eth = window.ethereum;
       if (!eth) return;
@@ -215,9 +226,10 @@ export function useFruitMarketLocal() {
       const signer = await provider.getSigner();
       const c = new Contract(contractAddress, abi, signer);
       const wei = parseEther(String(priceEth));
+      const idClamped = Math.min(255, Math.max(0, Math.floor(iconId)));
       setPendingTx(true);
       setTxMessage("Publication du produit…");
-      const tx = await c.addProduct(name, wei, BigInt(stock));
+      const tx = await c.addProduct(name, wei, BigInt(stock), description, idClamped);
       setTxMessage(`Transaction : ${tx.hash}`);
       await tx.wait();
       setPendingTx(false);

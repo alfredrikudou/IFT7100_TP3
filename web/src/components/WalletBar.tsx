@@ -4,7 +4,7 @@ type Props = {
   connected: boolean
   mockAddress: string
   onToggle: () => void
-  /** Libellé du réseau (ex. Hardhat local, simulation). */
+  /** Libellé du réseau (ex. Hardhat local). */
   networkLabel?: string
 }
 

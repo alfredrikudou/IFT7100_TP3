@@ -23,12 +23,19 @@ contract FruitMarketV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     error InvalidPayment(uint256 expected, uint256 received);
     error TransferFailed();
     error PurchaseNotFound(uint256 purchaseId);
+    error InvalidDescription();
+    error InvalidIconId();
+
+    uint256 public constant MAX_DESCRIPTION_LENGTH = 400;
+    uint8 public constant MAX_ICON_ID = 9;
 
     // --- Modèles ---
 
     struct Product {
         uint256 id;
         string name;
+        string description;
+        uint8 iconId;
         uint256 priceWei;
         uint256 stock;
         address seller;
@@ -59,6 +66,8 @@ contract FruitMarketV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint256 indexed productId,
         address indexed seller,
         string name,
+        string description,
+        uint8 iconId,
         uint256 priceWei,
         uint256 stock
     );
@@ -92,7 +101,60 @@ contract FruitMarketV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
         nextProductId = 1;
         nextPurchaseId = 1;
-        // TODO: autres initialisations
+        defaultProducts(msg.sender);
+    }
+
+    /**
+     * @notice Catalogue initial : 3 annonces au nom du propriétaire (`seller` = déployeur du proxy).
+     * @dev Appelée une seule fois depuis `initialize`.
+     */
+    function defaultProducts(address seller) internal {
+        _pushDefaultProduct(
+            seller,
+            "Pommes Cortland",
+            "Cueillette locale, sac de 5 kg.",
+            0,
+            0.001 ether,
+            80
+        );
+        _pushDefaultProduct(
+            seller,
+            "Bananes bio",
+            unicode"Origine Guatemala, point m\u00fbr.",
+            3,
+            0.002 ether,
+            60
+        );
+        _pushDefaultProduct(
+            seller,
+            "Oranges Valencia",
+            unicode"Jus ou table, cat\u00e9gorie I.",
+            2,
+            0.0015 ether,
+            45
+        );
+    }
+
+    function _pushDefaultProduct(
+        address seller,
+        string memory name,
+        string memory description,
+        uint8 iconId,
+        uint256 priceWei,
+        uint256 stock
+    ) private {
+        uint256 productId = nextProductId++;
+        _products[productId] = Product({
+            id: productId,
+            name: name,
+            description: description,
+            iconId: iconId,
+            priceWei: priceWei,
+            stock: stock,
+            seller: seller,
+            active: true
+        });
+        emit ProductAdded(productId, seller, name, description, iconId, priceWei, stock);
     }
 
     /**
@@ -100,25 +162,37 @@ contract FruitMarketV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param name nom du produit (non vide)
      * @param priceWei prix unitaire en wei (strictement positif)
      * @param stock quantité initiale disponible (> 0)
+     * @param description texte libre (peut être vide ; longueur plafonnée)
+     * @param iconId indice visuel 0..MAX_ICON_ID (aligné UI : liste d’emojis côté front)
      * @return productId identifiant du nouveau produit
      */
-    function addProduct(string calldata name, uint256 priceWei, uint256 stock) external returns (uint256 productId) {
+    function addProduct(
+        string calldata name,
+        uint256 priceWei,
+        uint256 stock,
+        string calldata description,
+        uint8 iconId
+    ) external returns (uint256 productId) {
         if (bytes(name).length == 0) revert InvalidProductName();
         if (priceWei == 0) revert InvalidPrice();
         if (stock == 0) revert InvalidStock();
+        if (bytes(description).length > MAX_DESCRIPTION_LENGTH) revert InvalidDescription();
+        if (iconId > MAX_ICON_ID) revert InvalidIconId();
 
         productId = nextProductId++;
         _products[productId] = Product({
             id: productId,
             name: name,
+            description: description,
+            iconId: iconId,
             priceWei: priceWei,
             stock: stock,
             seller: msg.sender,
             active: true
         });
 
-        emit ProductAdded(productId, msg.sender, name, priceWei, stock);
-        return productId; // pas forcé de retourner expliciter le champ il est déjà indiqué dans la déclaration de la fonction
+        emit ProductAdded(productId, msg.sender, name, description, iconId, priceWei, stock);
+        return productId;
     }
 
     /**

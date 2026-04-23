@@ -1,21 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useFruitMarketLocal } from "@/hooks/useFruitMarketLocal";
-import { MOCK_PRODUCTS } from "@/data/mockProducts";
 import { Header } from "@/components/Header";
 import { ProductCatalog } from "@/components/ProductCatalog";
 import { SellProductModal } from "@/components/SellProductModal";
-import type { NewProductInput, Product } from "@/types/product";
-
-const MOCK_WALLET = "0xaB12…cD89";
+import { FRUIT_EMOJIS } from "@/data/emojis";
+import type { NewProductInput } from "@/types/product";
 
 export default function FruitMarket() {
   const chain = useFruitMarketLocal();
-  const useChain = chain.mode === "local_chain";
+  const chainOk = chain.mode === "local_chain";
 
-  const [mockProducts, setMockProducts] = useState<Product[]>(() => [...MOCK_PRODUCTS]);
-  const [mockWalletConnected, setMockWalletConnected] = useState(false);
   const [sellOpen, setSellOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -25,84 +21,34 @@ export default function FruitMarket() {
   }, []);
 
   const handleWalletToggle = async () => {
-    if (useChain) {
-      if (chain.connected) {
-        chain.disconnect();
-        return;
-      }
-      try {
-        await chain.connect();
-      } catch (e) {
-        showToast(e instanceof Error ? e.message : String(e));
-      }
+    if (chain.connected) {
+      chain.disconnect();
       return;
     }
-    setMockWalletConnected((v) => !v);
-    showToast(
-      !mockWalletConnected ? "Portefeuille connecté (simulation)." : "Portefeuille déconnecté.",
-    );
-  };
-
-  const handleBuyMock = useCallback(
-    (productId: string, quantity: number) => {
-      let boughtName = "";
-      setMockProducts((prev) =>
-        prev.map((p) => {
-          if (p.id !== productId) return p;
-          boughtName = p.name;
-          const nextStock = Math.max(0, p.stock - quantity);
-          return { ...p, stock: nextStock };
-        }),
-      );
-      showToast(`Achat simulé : ${quantity} × ${boughtName || "produit"}`);
-    },
-    [showToast],
-  );
-
-  const handleBuy = useChain ? chain.buy : handleBuyMock;
-
-  const handleSellMock = (data: NewProductInput) => {
-    const id =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `p-${Date.now()}`;
-    setMockProducts((prev) => [
-      {
-        id,
-        ...data,
-        sellerLabel: mockWalletConnected ? MOCK_WALLET : data.sellerLabel,
-      },
-      ...prev,
-    ]);
-    showToast(`Annonce publiée (simulation) : ${data.name}`);
-  };
-
-  const handleSellChain = async (data: NewProductInput) => {
     try {
-      await chain.sell(data.name, data.priceEth, data.stock);
-      showToast(`Produit publié sur la chaîne : ${data.name}`);
+      await chain.connect();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const handleSell = async (data: NewProductInput) => {
+    try {
+      const iconIdx = FRUIT_EMOJIS.indexOf(data.emoji as (typeof FRUIT_EMOJIS)[number]);
+      const iconId = iconIdx >= 0 ? iconIdx : 0;
+      await chain.sell(data.name, data.priceEth, data.stock, data.description, iconId);
+      showToast(`Produit publié : ${data.name}`);
       setSellOpen(false);
     } catch (e) {
       showToast(e instanceof Error ? e.message : String(e));
     }
   };
 
-  const handleSell = useChain ? handleSellChain : handleSellMock;
+  const displayAddress = chain.account ? chain.shorten(chain.account) : "—";
 
-  const sortedMock = useMemo(
-    () => [...mockProducts].sort((a, b) => a.name.localeCompare(b.name, "fr")),
-    [mockProducts],
-  );
-
-  const displayProducts = useChain ? chain.products : sortedMock;
-  const walletConnected = useChain ? chain.connected : mockWalletConnected;
-  const displayAddress = useChain
-    ? chain.account
-      ? chain.shorten(chain.account)
-      : "—"
-    : MOCK_WALLET;
-
-  const networkLabel = useChain ? "Hardhat local (31337)" : "Simulation";
+  const catalogEmptyMessage = !chainOk
+    ? "Aucun catalogue : déployez le contrat et assurez-vous que le nœud Hardhat répond (voir les instructions ci-dessus)."
+    : undefined;
 
   return (
     <div className="app">
@@ -117,17 +63,17 @@ export default function FruitMarket() {
             style={{ marginBottom: "1rem", borderColor: "var(--danger)" }}
             role="alert"
           >
-            <strong>Développement local</strong>
+            <strong>Déploiement requis</strong>
             <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
-              {chain.deployLoadError} Ensuite : <code>npm run sync:abi</code> si tu modifies le contrat,
-              puis rafraîchis cette page.
+              {chain.deployLoadError} Ensuite : <code>npm run sync:abi</code> si tu modifies le contrat, puis
+              rafraîchis cette page.
             </p>
           </div>
         )}
 
         {chain.mode === "wrong_chain_config" && chain.deployInfo ? (
           <div className="hero-card" style={{ marginBottom: "1rem" }} role="status">
-            <strong>Configuration inattendue</strong>
+            <strong>Configuration réseau</strong>
             <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
               fruit-market-local.json indique chainId {chain.deployInfo.chainId}. Attendu 31337 pour Hardhat local.
             </p>
@@ -135,11 +81,12 @@ export default function FruitMarket() {
         ) : null}
 
         <Header
-          walletConnected={walletConnected}
+          walletConnected={chain.connected}
           mockAddress={displayAddress}
           onWalletToggle={() => void handleWalletToggle()}
           onOpenSell={() => setSellOpen(true)}
-          networkLabel={networkLabel}
+          networkLabel="Hardhat local (31337)"
+          sellDisabled={!chainOk}
         />
 
         <section className="hero" aria-labelledby="hero-title">
@@ -149,16 +96,16 @@ export default function FruitMarket() {
               Achetez et vendez des fruits sur la chaîne
             </h1>
             <p className="hero-lead">
-              {useChain ? (
+              {chainOk && chain.contractAddress ? (
                 <>
-                  Mode <strong>Hardhat local</strong> : les produits viennent du contrat déployé (
-                  <code style={{ fontSize: "0.85em" }}>{chain.contractAddress}</code>
-                  ). Utilise les comptes MetaMask importés avec les clés du nœud Hardhat si besoin.
+                  Catalogue et transactions via le contrat déployé à{" "}
+                  <code style={{ fontSize: "0.85em" }}>{chain.contractAddress}</code>. Importe les comptes Hardhat dans
+                  MetaMask si besoin.
                 </>
               ) : (
                 <>
-                  Sans fichier de déploiement local, l’interface utilise des <strong>données fictives</strong>.
-                  Déploie avec Hardhat pour brancher la chaîne réelle locale.
+                  Le catalogue provient uniquement du contrat une fois{" "}
+                  <code style={{ fontSize: "0.85em" }}>fruit-market-local.json</code> présent et le nœud local actif.
                 </>
               )}
             </p>
@@ -179,66 +126,49 @@ export default function FruitMarket() {
           </div>
         </section>
 
-        {useChain && chain.catalogError && (
+        {chainOk && chain.catalogError && (
           <div
             className="hero-card"
             style={{ marginBottom: "1rem", borderColor: "var(--danger)" }}
             role="alert"
           >
-            <strong>Catalogue introuvable sur le nœud</strong>
+            <strong>Impossible de lire le catalogue</strong>
             <p style={{ margin: "0.5rem 0 0", fontSize: "0.88rem" }}>
-              {chain.catalogError} — Vérifie que <code>npx hardhat node</code> tourne toujours et que{" "}
-              <code>fruit-market-local.json</code> correspond au dernier déploiement (
-              <code>npm run deploy:local</code>
+              {chain.catalogError} — Vérifie que <code>npx hardhat node</code> tourne et que{" "}
+              <code>fruit-market-local.json</code> correspond au dernier déploiement (<code>npm run deploy:local</code>
               ).
             </p>
           </div>
         )}
-        {useChain && chain.txMessage && (
+        {chainOk && chain.txMessage && (
           <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{chain.txMessage}</p>
         )}
-        {useChain && chain.loadingCatalog && (
-          <p style={{ fontSize: "0.9rem" }}>Chargement du catalogue…</p>
-        )}
-        {useChain && chain.pendingTx && <p style={{ fontSize: "0.9rem" }}>Transaction en cours…</p>}
+        {chainOk && chain.loadingCatalog && <p style={{ fontSize: "0.9rem" }}>Chargement du catalogue…</p>}
+        {chainOk && chain.pendingTx && <p style={{ fontSize: "0.9rem" }}>Transaction en cours…</p>}
 
         <div id="catalogue">
           <ProductCatalog
-            products={displayProducts}
-            walletConnected={walletConnected}
+            products={chain.products}
+            walletConnected={chain.connected}
             onBuy={(id, qty) => {
-              if (useChain) {
-                void chain.buy(id, qty).catch((e) =>
-                  showToast(e instanceof Error ? e.message : String(e)),
-                );
-              } else {
-                handleBuyMock(id, qty);
-              }
+              void chain.buy(id, qty).catch((e) =>
+                showToast(e instanceof Error ? e.message : String(e)),
+              );
             }}
+            emptyMessage={catalogEmptyMessage}
           />
         </div>
 
         <footer className="footer">
-          <p>
-            {useChain
-              ? "Réseau local Hardhat — ETH de test uniquement."
-              : "Sans déploiement local : démonstration hors chaîne."}
-          </p>
+          <p>Réseau local Hardhat — ETH de test ; données produits lues depuis le contrat.</p>
         </footer>
       </div>
 
       <SellProductModal
         open={sellOpen}
         onClose={() => setSellOpen(false)}
-        onSubmit={(data) => {
-          if (useChain) void handleSellChain(data);
-          else {
-            handleSellMock(data);
-            setSellOpen(false);
-          }
-        }}
-        walletConnected={walletConnected}
-        chainMode={useChain}
+        onSubmit={(data) => void handleSell(data)}
+        walletConnected={chain.connected}
       />
 
       {toast && (

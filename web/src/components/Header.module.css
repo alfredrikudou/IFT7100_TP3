@@ -52,6 +52,13 @@
   cursor: pointer;
 }
 
-.sellBtn:hover {
+.sellBtn:hover:not(:disabled) {
   background: rgb(34 139 84 / 0.08);
+}
+
+.sellBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--muted);
 }

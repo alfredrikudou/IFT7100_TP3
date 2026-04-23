@@ -91,7 +91,7 @@ export function ProductCard({ product, walletConnected, onBuy }: Props) {
           Acheter
         </button>
         {!walletConnected && (
-          <p className={styles.hint}>Connectez un portefeuille pour simuler un achat.</p>
+          <p className={styles.hint}>Connectez un portefeuille pour acheter on-chain.</p>
         )}
       </div>
     </div>
