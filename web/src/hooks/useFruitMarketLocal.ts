@@ -15,6 +15,9 @@ import abi from "@/contracts/FruitMarketV2.abi.json";
 import { emojiFromIconId } from "@/data/emojis";
 import { ensureHardhatLocalChain } from "@/lib/chain";
 
+/** Si l’utilisateur a cliqué « déconnecter », on n’applique pas `eth_accounts` au prochain montage. */
+const SESSION_WALLET_DISCONNECTED = "fruit-market-wallet-disconnected";
+
 type LocalDeployFile = {
   proxyAddress: string;
   chainId: number;
@@ -88,9 +91,37 @@ export function useFruitMarketLocal() {
         if (cancelled) return;
         setDeployInfo(null);
         setDeployLoadError(
-          "Fichier fruit-market-local.json introuvable. À la racine du repo : `npx hardhat node` puis `npm run deploy:local`.",
+          "Le marché est momentanément indisponible. Réessayez plus tard.",
         );
       });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
+   * Chaque page client remonte le hook : on relit les comptes déjà autorisés via `eth_accounts`
+   * (sans popup), pour rester « connecté » visuellement entre `/` et `/achats`.
+   */
+  useEffect(() => {
+    try {
+      if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(SESSION_WALLET_DISCONNECTED)) {
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+    const eth = window.ethereum;
+    if (!eth?.request) return;
+    let cancelled = false;
+    void eth
+      .request({ method: "eth_accounts" })
+      .then((accs: unknown) => {
+        if (cancelled) return;
+        const a = Array.isArray(accs) && typeof accs[0] === "string" ? accs[0] : null;
+        setAccount(a);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -293,12 +324,22 @@ export function useFruitMarketLocal() {
     const addr = await signer.getAddress();
     setAccount(addr);
     setTxMessage(null);
+    try {
+      sessionStorage.removeItem(SESSION_WALLET_DISCONNECTED);
+    } catch {
+      /* ignore */
+    }
     await refreshCatalog();
   }, [contractAddress, refreshCatalog]);
 
   const disconnect = useCallback(() => {
     setAccount(null);
     setTxMessage(null);
+    try {
+      sessionStorage.setItem(SESSION_WALLET_DISCONNECTED, "1");
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const buy = useCallback(

@@ -49,7 +49,7 @@ export default function FruitMarket() {
   const displayAddress = chain.account ? chain.shorten(chain.account) : "—";
 
   const catalogEmptyMessage = !chainOk
-    ? "Aucun catalogue : déployez le contrat et assurez-vous que le nœud Hardhat répond (voir les instructions ci-dessus)."
+    ? "Le catalogue n’est pas disponible pour le moment."
     : undefined;
 
   return (
@@ -65,19 +65,18 @@ export default function FruitMarket() {
             style={{ marginBottom: "1rem", borderColor: "var(--danger)" }}
             role="alert"
           >
-            <strong>Déploiement requis</strong>
+            <strong>Service indisponible</strong>
             <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
-              {chain.deployLoadError} Ensuite : <code>npm run sync:abi</code> si tu modifies le contrat, puis
-              rafraîchis cette page.
+              Le marché ne peut pas être chargé. Veuillez réessayer plus tard.
             </p>
           </div>
         )}
 
         {chain.mode === "wrong_chain_config" && chain.deployInfo ? (
           <div className="hero-card" style={{ marginBottom: "1rem" }} role="status">
-            <strong>Configuration réseau</strong>
+            <strong>Réseau non pris en charge</strong>
             <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
-              fruit-market-local.json indique chainId {chain.deployInfo.chainId}. Attendu 31337 pour Hardhat local.
+              Utilisez le réseau prévu par ce site dans votre portefeuille, ou contactez le support.
             </p>
           </div>
         ) : null}
@@ -87,7 +86,6 @@ export default function FruitMarket() {
           mockAddress={displayAddress}
           onWalletToggle={() => void handleWalletToggle()}
           onOpenSell={() => setSellOpen(true)}
-          networkLabel="Hardhat local (31337)"
           sellDisabled={!chainOk}
           navSlot={
             chainOk && chain.connected ? (
@@ -100,38 +98,13 @@ export default function FruitMarket() {
 
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-text">
-            <p className="hero-kicker">IFT 7100 — TP3 · DApp Fruit Market</p>
+            <p className="hero-kicker">Fruit Market</p>
             <h1 id="hero-title" className="hero-title">
-              Achetez et vendez des fruits sur la chaîne
+              Achetez et vendez des fruits en toute transparence
             </h1>
             <p className="hero-lead">
-              {chainOk && chain.contractAddress ? (
-                <>
-                  Catalogue et transactions via le contrat déployé à{" "}
-                  <code style={{ fontSize: "0.85em" }}>{chain.contractAddress}</code>. Importe les comptes Hardhat dans
-                  MetaMask si besoin.
-                </>
-              ) : (
-                <>
-                  Le catalogue provient uniquement du contrat une fois{" "}
-                  <code style={{ fontSize: "0.85em" }}>fruit-market-local.json</code> présent et le nœud local actif.
-                </>
-              )}
+              Publiez vos annonces, réglez les achats et les avis directement depuis votre portefeuille numérique.
             </p>
-          </div>
-          <div className="hero-card" role="note">
-            <strong>Commandes utiles (racine du repo)</strong>
-            <ol style={{ margin: "0.5rem 0 0", paddingLeft: "1.2rem", lineHeight: 1.6 }}>
-              <li>
-                Terminal 1 : <code>npx hardhat node</code>
-              </li>
-              <li>
-                Terminal 2 : <code>npm run compile && npm run sync:abi && npm run deploy:local</code>
-              </li>
-              <li>
-                Terminal 3 : <code>npm run web:dev</code>
-              </li>
-            </ol>
           </div>
         </section>
 
@@ -141,11 +114,9 @@ export default function FruitMarket() {
             style={{ marginBottom: "1rem", borderColor: "var(--danger)" }}
             role="alert"
           >
-            <strong>Impossible de lire le catalogue</strong>
+            <strong>Catalogue momentanément inaccessible</strong>
             <p style={{ margin: "0.5rem 0 0", fontSize: "0.88rem" }}>
-              {chain.catalogError} — Vérifie que <code>npx hardhat node</code> tourne et que{" "}
-              <code>fruit-market-local.json</code> correspond au dernier déploiement (<code>npm run deploy:local</code>
-              ).
+              {chain.catalogError} — Réessayez dans quelques instants.
             </p>
           </div>
         )}
@@ -170,7 +141,7 @@ export default function FruitMarket() {
         </div>
 
         <footer className="footer">
-          <p>Réseau local Hardhat — ETH de test ; données produits lues depuis le contrat.</p>
+          <p>Fruit Market — annonces et historique enregistrés sur la blockchain.</p>
         </footer>
       </div>
 

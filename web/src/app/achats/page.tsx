@@ -50,8 +50,10 @@ export default function AchatsPage() {
             style={{ marginBottom: "1rem", borderColor: "var(--danger)" }}
             role="alert"
           >
-            <strong>Déploiement requis</strong>
-            <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>{chain.deployLoadError}</p>
+            <strong>Service indisponible</strong>
+            <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
+              Le marché ne peut pas être chargé. Veuillez réessayer plus tard.
+            </p>
           </div>
         )}
 
@@ -60,7 +62,6 @@ export default function AchatsPage() {
           mockAddress={displayAddress}
           onWalletToggle={() => void handleWalletToggle()}
           onOpenSell={() => {}}
-          networkLabel="Hardhat local (31337)"
           sellDisabled={!chainOk}
           hideSell
           navSlot={
@@ -97,14 +98,14 @@ export default function AchatsPage() {
           ) : (
             <section className="hero-card" role="status">
               <p style={{ margin: 0 }}>
-                Connectez un portefeuille (bouton en haut à droite) pour voir vos achats et attribuer des notes.
+                Connectez votre portefeuille pour voir vos achats et attribuer une note aux vendeurs.
               </p>
             </section>
           )}
         </main>
 
         <footer className="footer" style={{ marginTop: "2rem" }}>
-          <p>Réseau local Hardhat — données lues depuis le contrat.</p>
+          <p>Fruit Market — vos achats sont enregistrés sur la blockchain.</p>
         </footer>
       </div>
 

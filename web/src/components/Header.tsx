@@ -34,7 +34,7 @@ export function Header({
         </span>
         <div>
           <span className={styles.title}>Fruit Market</span>
-          <span className={styles.tagline}>Marché décentralisé — données on-chain</span>
+          <span className={styles.tagline}>Annonces et paiements sur la blockchain</span>
         </div>
       </div>
 
@@ -52,7 +52,7 @@ export function Header({
             className={styles.sellBtn}
             onClick={onOpenSell}
             disabled={sellDisabled}
-            title={sellDisabled ? "Déployez le contrat local avant de publier." : undefined}
+            title={sellDisabled ? "Publication indisponible pour le moment." : undefined}
           >
             Vendre un produit
           </button>

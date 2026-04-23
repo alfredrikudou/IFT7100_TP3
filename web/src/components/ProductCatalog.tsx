@@ -16,7 +16,7 @@ type Props = {
 export function ProductCatalog({ products, walletConnected, onBuy, emptyMessage, sellerRatings }: Props) {
   const empty =
     emptyMessage ??
-    "Aucun produit actif sur le contrat pour le moment. Publiez une annonce via « Vendre un produit »."
+    "Aucun produit pour le moment. Utilisez « Vendre un produit » pour publier une annonce."
 
   return (
     <section className={styles.section} aria-labelledby="catalog-title">
@@ -25,8 +25,8 @@ export function ProductCatalog({ products, walletConnected, onBuy, emptyMessage,
           Catalogue
         </h2>
         <p className={styles.sub}>
-          Produits lus depuis le contrat. La note affichée est celle du vendeur (agrégée sur tous ses produits), pas
-          par annonce.
+          La note affichée par vendeur regroupe tous ses produits : plusieurs annonces du même vendeur partagent la même
+          réputation.
         </p>
       </div>
       <div className={styles.grid}>

@@ -65,7 +65,7 @@ export function ProductCard({ product, walletConnected, onBuy, sellerRating }: P
           </span>
         </div>
         <p className={styles.seller}>Vendeur : {product.sellerLabel}</p>
-        <p className={styles.reputationLabel}>Réputation du vendeur (tous ses produits)</p>
+        <p className={styles.reputationLabel}>Réputation du vendeur</p>
         {sellerRating && sellerRating.totalRatings > BigInt(0) ? (
           <p className={styles.rating}>
             Moyenne : {(Number(sellerRating.averageScaledBy100) / 100).toFixed(1)} / 5 —{" "}
@@ -103,7 +103,7 @@ export function ProductCard({ product, walletConnected, onBuy, sellerRating }: P
           Acheter
         </button>
         {!walletConnected && (
-          <p className={styles.hint}>Connectez un portefeuille pour acheter on-chain.</p>
+          <p className={styles.hint}>Connectez votre portefeuille pour acheter.</p>
         )}
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { MyPurchaseRow } from "@/types/purchase";
 import type { Product } from "@/types/product";
 import styles from "./MyPurchasesPanel.module.css";
@@ -9,6 +10,72 @@ function formatEth(n: number) {
     minimumFractionDigits: 4,
     maximumFractionDigits: 6,
   });
+}
+
+function RatingStarsReadonly({ value }: { value: number }) {
+  return (
+    <span className={styles.starReadonlyRow} aria-label={`${value} sur 5 étoiles`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} className={i <= value ? styles.starFilled : styles.starEmpty} aria-hidden>
+          {i <= value ? "★" : "☆"}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** Étoiles vides par défaut ; se remplissent selon la position du curseur (survol). */
+function StarRatingPicker({
+  purchaseId,
+  onPick,
+  disabled,
+}: {
+  purchaseId: string;
+  onPick: (purchaseId: string, rating: number) => void;
+  disabled: boolean;
+}) {
+  const [hover, setHover] = useState<number | null>(null);
+  const active = hover ?? 0;
+
+  return (
+    <div
+      className={styles.stars}
+      role="group"
+      aria-label={`Noter l’achat ${purchaseId} sur 5 étoiles`}
+      onMouseLeave={() => setHover(null)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setHover(null);
+        }
+      }}
+    >
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          className={styles.starBtn}
+          disabled={disabled}
+          onMouseEnter={() => setHover(n)}
+          onFocus={() => setHover(n)}
+          onClick={() => {
+            onPick(purchaseId, n);
+            setHover(null);
+          }}
+          title={`Attribuer ${n} étoile${n > 1 ? "s" : ""}`}
+        >
+          <span
+            className={active >= n ? styles.starGlyphFilled : styles.starGlyphEmpty}
+            aria-hidden
+          >
+            {active >= n ? "★" : "☆"}
+          </span>
+          <span className={styles.visuallyHidden}>
+            {n} étoile{n > 1 ? "s" : ""}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
 }
 
 type Props = {
@@ -60,8 +127,7 @@ export function MyPurchasesPanel({
           Mes achats & notation
         </h2>
         <p className={styles.sub}>
-          Quantités et montants issus du contrat ; votre note apparaît après la transaction{" "}
-          <code className={styles.code}>rateSeller</code>.
+          Montants et quantités enregistrés lors de l’achat. Après votre notation, elle apparaît sous l’achat concerné.
         </p>
       </div>
 
@@ -89,29 +155,22 @@ export function MyPurchasesPanel({
                 {row.rated ? (
                   <p className={styles.myVote}>
                     Votre note pour cet achat :{" "}
-                    <strong>
-                      {row.myRating != null ? `${row.myRating} / 5` : "enregistrée (recharger si besoin)"}
-                    </strong>
+                    {row.myRating != null ? (
+                      <RatingStarsReadonly value={row.myRating} />
+                    ) : (
+                      <strong className={styles.myVoteFallback}>en cours d’affichage</strong>
+                    )}
                   </p>
                 ) : null}
               </div>
               {row.rated ? (
                 <span className={styles.done}>Noté</span>
               ) : (
-                <div className={styles.stars} role="group" aria-label={`Noter l’achat ${row.purchaseId}`}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      className={styles.starBtn}
-                      disabled={pendingTx}
-                      onClick={() => onRate(row.purchaseId, n)}
-                      title={`${n} / 5`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
+                <StarRatingPicker
+                  purchaseId={row.purchaseId}
+                  onPick={onRate}
+                  disabled={pendingTx}
+                />
               )}
             </li>
           );

@@ -54,9 +54,7 @@ export function SellProductModal({ open, onClose, onSubmit, walletConnected }: P
           </button>
         </div>
         {!walletConnected && (
-          <p className={styles.warn}>
-            Connectez MetaMask sur le réseau Hardhat local (31337) pour signer la transaction.
-          </p>
+          <p className={styles.warn}>Connectez votre portefeuille pour publier une annonce.</p>
         )}
         <form onSubmit={handleSubmit} className={styles.form}>
           <label className={styles.field}>

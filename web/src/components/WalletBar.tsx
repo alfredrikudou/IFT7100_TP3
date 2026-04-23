@@ -4,19 +4,20 @@ type Props = {
   connected: boolean
   mockAddress: string
   onToggle: () => void
-  /** Libellé du réseau (ex. Hardhat local). */
+  /** Libellé réseau affiché à côté du portefeuille (optionnel). */
   networkLabel?: string
 }
 
 export function WalletBar({ connected, mockAddress, onToggle, networkLabel }: Props) {
-  const net = networkLabel ?? 'Simulation'
   return (
     <div className={styles.wrap}>
       {connected ? (
         <>
-          <span className={styles.badge} title="Réseau courant">
-            Réseau : {net}
-          </span>
+          {networkLabel ? (
+            <span className={styles.badge} title="Réseau">
+              {networkLabel}
+            </span>
+          ) : null}
           <span className={styles.address}>{mockAddress}</span>
           <button type="button" className={styles.btnGhost} onClick={onToggle}>
             Déconnecter

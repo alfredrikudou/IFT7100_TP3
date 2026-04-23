@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fruit Market — IFT 7100 TP3",
-  description: "DApp marketplace de fruits (mouture UI, données fictives)",
+  title: "Fruit Market",
+  description: "Marché de fruits : annonces, achats et avis sur la blockchain.",
 };
 
 export default function RootLayout({
