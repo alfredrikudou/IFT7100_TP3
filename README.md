@@ -1,7 +1,8 @@
 # IFT7100_TP3 - Marche de fruits decentralise (UUPS)
 
 ## Luc Alfred MBIDA - 537 333 752 
-## Lien git: https://github.com/alfredrikudou/IFT7100_TP3
+### Lien git: https://github.com/alfredrikudou/IFT7100_TP3
+### Lien video: https://youtu.be/wNKUazdN2i8
 
 Ce projet implemente une mini place de marche de fruits sur Ethereum avec des contrats **upgradeables UUPS** et une interface web Next.js.
 
