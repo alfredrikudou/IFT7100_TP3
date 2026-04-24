@@ -1,0 +1,305 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x8c80D6f63d30bF9db08970167452C6c87A45C54b",
+      "txHash": "0xd2c225898a9b629a60b154c635cff63ac5e72dce833f10931e490d95cfb3c196",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "805774f132b76d4fabb12eb8fe20c6727b593b537411e1e73e4147654a13e083": {
+      "address": "0xd537e189D281Dc2f46Fbb6b18404c606ed0C1662",
+      "txHash": "0xf550da4bdbf4fa6c90824ea4b6e95175da3dd90ebcdb35eba3f6af7f5abf2ef6",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "nextProductId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "FruitMarketV1",
+            "src": "contracts\\FruitMarketV1.sol:57"
+          },
+          {
+            "label": "nextPurchaseId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "FruitMarketV1",
+            "src": "contracts\\FruitMarketV1.sol:58"
+          },
+          {
+            "label": "_products",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_uint256,t_struct(Product)1789_storage)",
+            "contract": "FruitMarketV1",
+            "src": "contracts\\FruitMarketV1.sol:60"
+          },
+          {
+            "label": "_purchases",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_uint256,t_struct(Purchase)1804_storage)",
+            "contract": "FruitMarketV1",
+            "src": "contracts\\FruitMarketV1.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "FruitMarketV1",
+            "src": "contracts\\FruitMarketV1.sol:296"
+          },
+          {
+            "label": "_sellerRatingSum",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "FruitMarketV2",
+            "src": "contracts\\FruitMarketV2.sol:18"
+          },
+          {
+            "label": "_sellerRatingCount",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "FruitMarketV2",
+            "src": "contracts\\FruitMarketV2.sol:20"
+          },
+          {
+            "label": "_purchaseRated",
+            "offset": 0,
+            "slot": "56",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "contract": "FruitMarketV2",
+            "src": "contracts\\FruitMarketV2.sol:22"
+          },
+          {
+            "label": "__gapV2",
+            "offset": 0,
+            "slot": "57",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "FruitMarketV2",
+            "src": "contracts\\FruitMarketV2.sol:83"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)224_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Product)1789_storage)": {
+            "label": "mapping(uint256 => struct FruitMarketV1.Product)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Purchase)1804_storage)": {
+            "label": "mapping(uint256 => struct FruitMarketV1.Purchase)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Product)1789_storage": {
+            "label": "struct FruitMarketV1.Product",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "name",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "description",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "iconId",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "priceWei",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "stock",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "seller",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "active",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(Purchase)1804_storage": {
+            "label": "struct FruitMarketV1.Purchase",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "productId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "buyer",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "seller",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "quantity",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "totalPaid",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

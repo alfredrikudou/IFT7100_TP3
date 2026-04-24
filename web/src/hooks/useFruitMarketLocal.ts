@@ -13,7 +13,7 @@ import type { Product } from "@/types/product";
 import type { MyPurchaseRow, SellerRatingInfo } from "@/types/purchase";
 import abi from "@/contracts/FruitMarketV2.abi.json";
 import { emojiFromIconId } from "@/data/emojis";
-import { ensureHardhatLocalChain } from "@/lib/chain";
+import { ensureHardhatLocalChain, ensureSepoliaChain } from "@/lib/chain";
 
 /** Si l’utilisateur a cliqué « déconnecter », on n’applique pas `eth_accounts` au prochain montage. */
 const SESSION_WALLET_DISCONNECTED = "fruit-market-wallet-disconnected";
@@ -72,28 +72,38 @@ export function useFruitMarketLocal() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/fruit-market-local.json")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json() as Promise<LocalDeployFile>;
-      })
-      .then((raw: LocalDeployFile) => {
-        if (cancelled) return;
-        const cid = Number(raw.chainId);
-        setDeployInfo({
-          proxyAddress: raw.proxyAddress,
-          chainId: Number.isFinite(cid) && cid > 0 ? cid : 31337,
-          rpcUrl: raw.rpcUrl ?? "http://127.0.0.1:8545",
-        });
-        setDeployLoadError(null);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setDeployInfo(null);
-        setDeployLoadError(
-          "Le marché est momentanément indisponible. Réessayez plus tard.",
-        );
-      });
+
+    async function load(): Promise<void> {
+      const tryPaths = ["/fruit-market-deploy.json", "/fruit-market-local.json"];
+      let lastErr: unknown;
+      for (const p of tryPaths) {
+        try {
+          const r = await fetch(p);
+          if (!r.ok) continue;
+          const raw = (await r.json()) as LocalDeployFile;
+          if (cancelled) return;
+          const cid = Number(raw.chainId);
+          setDeployInfo({
+            proxyAddress: raw.proxyAddress,
+            chainId: Number.isFinite(cid) && cid > 0 ? cid : 31337,
+            rpcUrl: raw.rpcUrl ?? "http://127.0.0.1:8545",
+          });
+          setDeployLoadError(null);
+          return;
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      if (cancelled) return;
+      setDeployInfo(null);
+      setDeployLoadError(
+        lastErr instanceof Error
+          ? lastErr.message
+          : "Le marché est momentanément indisponible. Réessayez plus tard.",
+      );
+    }
+
+    void load();
     return () => {
       cancelled = true;
     };
@@ -128,21 +138,30 @@ export function useFruitMarketLocal() {
   }, []);
 
   const contractAddress = deployInfo?.proxyAddress ?? null;
-  const chainReady = Boolean(contractAddress && deployInfo?.chainId === 31337);
+  const chainReady = Boolean(contractAddress && deployInfo?.chainId);
 
   /**
-   * Lectures catalogue via proxy Next `/api/rpc` → Hardhat (évite CORS navigateur → :8545).
-   * MetaMask n’est pas utilisé pour les vues ; les écritures restent via BrowserProvider.
+   * Lectures catalogue : Hardhat → `/api/rpc` ; Sepolia → `/api/rpc-sepolia` (clé côté serveur).
+   * Les écritures passent par MetaMask (`BrowserProvider`).
    */
   const readOnlyContract = useCallback(() => {
-    if (!contractAddress) return null;
-    const rpcUrl =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/api/rpc`
-        : deployInfo?.rpcUrl ?? "http://127.0.0.1:8545";
+    if (!contractAddress || !deployInfo?.chainId) return null;
+    const cid = deployInfo.chainId;
+    let rpcUrl: string;
+    if (typeof window !== "undefined") {
+      if (cid === 31337) {
+        rpcUrl = `${window.location.origin}/api/rpc`;
+      } else if (cid === 11155111) {
+        rpcUrl = `${window.location.origin}/api/rpc-sepolia`;
+      } else {
+        rpcUrl = deployInfo.rpcUrl ?? "http://127.0.0.1:8545";
+      }
+    } else {
+      rpcUrl = deployInfo.rpcUrl ?? "http://127.0.0.1:8545";
+    }
     const provider = new JsonRpcProvider(rpcUrl);
     return new Contract(contractAddress, abi, provider);
-  }, [contractAddress, deployInfo?.rpcUrl]);
+  }, [contractAddress, deployInfo?.chainId, deployInfo?.rpcUrl]);
 
   const refreshCatalog = useCallback(async () => {
     const c = readOnlyContract();
@@ -175,7 +194,7 @@ export function useFruitMarketLocal() {
       setProducts(list.sort((a, b) => a.name.localeCompare(b.name, "fr")));
     } catch (e) {
       const msg =
-        e instanceof Error ? e.message : "Impossible de lire le catalogue sur le nœud local.";
+        e instanceof Error ? e.message : "Impossible de lire le catalogue sur la chaîne configurée.";
       setCatalogError(msg);
       setProducts([]);
     } finally {
@@ -315,7 +334,12 @@ export function useFruitMarketLocal() {
 
   const connect = useCallback(async () => {
     if (!contractAddress) return;
-    await ensureHardhatLocalChain();
+    const cid = deployInfo?.chainId ?? 31337;
+    if (cid === 11155111) {
+      await ensureSepoliaChain();
+    } else {
+      await ensureHardhatLocalChain();
+    }
     const eth = window.ethereum;
     if (!eth) throw new Error("MetaMask introuvable.");
     await eth.request({ method: "eth_requestAccounts" });
@@ -330,7 +354,7 @@ export function useFruitMarketLocal() {
       /* ignore */
     }
     await refreshCatalog();
-  }, [contractAddress, refreshCatalog]);
+  }, [contractAddress, deployInfo?.chainId, refreshCatalog]);
 
   const disconnect = useCallback(() => {
     setAccount(null);
@@ -419,7 +443,6 @@ export function useFruitMarketLocal() {
 
   const mode = useMemo(() => {
     if (deployLoadError && !deployInfo) return "no_deploy_file" as const;
-    if (deployInfo && deployInfo.chainId !== 31337) return "wrong_chain_config" as const;
     if (!chainReady) return "wrong_chain_config" as const;
     return "local_chain" as const;
   }, [deployLoadError, deployInfo, chainReady]);

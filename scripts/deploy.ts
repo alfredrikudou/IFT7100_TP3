@@ -25,28 +25,43 @@ async function main() {
   console.log("Implémentation V2 :", implAddress);
   console.log("Chain ID :", net.chainId.toString());
 
+  const outDir = path.join(__dirname, "..", "web", "public");
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const deployPayload = {
+    proxyAddress,
+    chainId: Number(net.chainId),
+    /** Lecture catalogue : Hardhat local via proxy Next ; Sepolia via /api/rpc-sepolia (voir web/.env.example). */
+    rpcUrl:
+      net.chainId === 31337n
+        ? "http://127.0.0.1:8545"
+        : process.env.SEPOLIA_RPC_URL ?? "",
+  };
+
+  const deployFile = path.join(outDir, "fruit-market-deploy.json");
+  fs.writeFileSync(deployFile, JSON.stringify(deployPayload, null, 2));
+  console.log("\nConfig front (prioritaire pour Next.js) :", deployFile);
+
   if (net.chainId === 31337n) {
-    const outDir = path.join(__dirname, "..", "web", "public");
-    const outFile = path.join(outDir, "fruit-market-local.json");
-    fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(
-      outFile,
-      JSON.stringify(
-        {
-          proxyAddress,
-          chainId: Number(net.chainId),
-          rpcUrl: "http://127.0.0.1:8545",
-        },
-        null,
-        2,
-      ),
-    );
-    console.log("\nFichier front écrit :", outFile);
+    const localAlias = path.join(outDir, "fruit-market-local.json");
+    fs.writeFileSync(localAlias, JSON.stringify(deployPayload, null, 2));
+    console.log("Alias local dev :", localAlias);
     console.log("Relance ou rafraîchis Next.js (npm run web:dev) si besoin.");
+  } else if (!deployPayload.rpcUrl) {
+    console.warn(
+      "\n⚠ SEPOLIA_RPC_URL vide : ajoute-la dans web/.env.local pour que /api/rpc-sepolia fonctionne.",
+    );
   }
 
   console.log("\nÀ garder pour le README / la vidéo TP :");
-  console.log("- Réseau :", net.chainId === 31337n ? "Hardhat local (31337)" : "voir chain id ci-dessus");
+  console.log(
+    "- Réseau :",
+    net.chainId === 31337n
+      ? "Hardhat local (31337)"
+      : net.chainId === 11155111n
+        ? "Sepolia (11155111)"
+        : `chain id ${net.chainId}`,
+  );
   console.log("- Adresse proxy :", proxyAddress);
 }
 
