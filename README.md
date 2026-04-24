@@ -1,5 +1,8 @@
 # IFT7100_TP3 - Marche de fruits decentralise (UUPS)
 
+## Luc Alfred MBIDA - 537 333 752 
+## Lien git: https://github.com/alfredrikudou/IFT7100_TP3
+
 Ce projet implemente une mini place de marche de fruits sur Ethereum avec des contrats **upgradeables UUPS** et une interface web Next.js.
 
 L'objectif est de demontrer:
@@ -181,92 +184,3 @@ Important: `PROXY_ADDRESS` doit etre l'adresse **du proxy**, pas celle de l'impl
 - **Mauvais reseau MetaMask**: passer sur `Sepolia` (ou `localhost 31337` en local).
 - **Fichier deploy absent**: relancer `deploy:local` ou `deploy:sepolia`.
 
-## Trame "rapport TP" (prête a remplir)
-
-Cette section peut etre reprise telle quelle dans votre rapport final.
-
-### 1) Contexte et objectif
-
-- **Cours**: IFT7100 - Cryptographie / Blockchain
-- **Projet**: marche de fruits decentralise upgradeable (pattern UUPS)
-- **Objectif technique**: montrer la continuite d'un contrat via proxy et l'ajout de fonctionnalites en V2 sans changer l'adresse du proxy.
-
-### 2) Architecture technique
-
-- **Smart contracts**:
-  - `contracts/FruitMarketV1.sol`
-  - `contracts/FruitMarketV2.sol` (heritage de V1)
-- **Scripts Hardhat**:
-  - `scripts/deploy.ts` (deploiement proxy + implementation)
-  - `scripts/upgrade.ts` (upgrade du proxy vers V2)
-  - `scripts/sync-abi.mjs` (synchronisation ABI vers le front)
-- **Frontend**:
-  - Next.js dans `web/`
-  - lecture de `web/public/fruit-market-deploy.json`
-
-### 3) Fonctionnalites implementees
-
-#### V1
-- creation/edition/desactivation de produits;
-- achat avec verification stricte du paiement en ETH;
-- stockage des achats;
-- protections metier (stock, droits vendeur, produit actif).
-
-#### V2
-- notation vendeur post-achat (1 a 5);
-- un achat ne peut etre note qu'une seule fois;
-- seul l'acheteur de l'achat peut noter;
-- calcul de reputation agregée par vendeur.
-
-### 4) Procedure de reproduction (correcteur)
-
-1. **Cloner le depot**  
-2. **Installer**:
-   ```bash
-   npm install
-   npm install --prefix web
-   ```
-3. **Configurer**:
-   - `IFT7100_TP3/.env`
-   - `IFT7100_TP3/web/.env.local`
-4. **Compiler + tester**:
-   ```bash
-   npm run compile
-   npm test
-   npm run sync:abi
-   ```
-5. **Deployer**:
-   - local: `npm run node` puis `npm run deploy:local`
-   - sepolia: `npm run deploy:sepolia`
-6. **Lancer le front**:
-   ```bash
-   npm run web:dev
-   ```
-7. **Verifier le parcours**:
-   - connexion wallet;
-   - ajout produit;
-   - achat;
-   - notation vendeur (V2).
-
-### 5) Preuves a inclure dans le rapport/video
-
-- adresse **proxy** (celle a conserver dans le temps);
-- adresse **implementation** au deploiement;
-- preuve d'upgrade (ancienne vs nouvelle implementation);
-- extrait des events:
-  - `ProductAdded`
-  - `ProductPurchased`
-  - `SellerRated`
-- capture de `fruit-market-deploy.json` (chainId + proxyAddress);
-- capture UI montrant une transaction d'achat et une notation.
-
-### 6) Limites et ameliorations possibles
-
-- ajouter pagination/filtres de catalogue;
-- ajouter historique vendeur/carnet de commandes;
-- ajouter moderation/roles avances;
-- ajouter analytics on-chain/off-chain.
-
-### 7) Conclusion
-
-Le projet valide un cycle complet de DApp upgradeable: conception, implementation V1, evolution V2 par upgrade proxy, et demonstration en local puis Sepolia.
