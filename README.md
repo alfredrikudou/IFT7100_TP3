@@ -1,10 +1,10 @@
-# IFT7100_TP3 - Marche de fruits decentralise (UUPS)
+# IFT7100_TP3 - Marché de fruits decentralise (UUPS)
 
 ## Luc Alfred MBIDA - 537 333 752 
 ### Lien git: https://github.com/alfredrikudou/IFT7100_TP3
 ### Lien video: https://youtu.be/wNKUazdN2i8
 
-Ce projet implemente une mini place de marche de fruits sur Ethereum avec des contrats **upgradeables UUPS** et une interface web Next.js.
+Ce projet implemente une mini place de marché de fruits sur Ethereum avec des contrats **upgradeables UUPS** et une interface web Next.js.
 
 L'objectif est de demontrer:
 - un cycle complet de developpement smart contract (`compile`, `test`, `deploy`);
@@ -13,7 +13,7 @@ L'objectif est de demontrer:
 
 ## Projet choisi
 
-Le projet choisi est un **marche de fruits decentralise**:
+Le projet choisi est un **marché de fruits decentralise**:
 - des vendeurs publient des produits (nom, description, icone, prix, stock);
 - des acheteurs achetent en ETH;
 - les achats sont traces on-chain;
